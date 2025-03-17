@@ -502,6 +502,7 @@ AddFriends(renew := false, getFC := false) {
 				Delay(3)
 				adbClick(210, 342)
 				Delay(3)
+				ClipWait
 				friendCode := Clipboard
 				return friendCode
 			}
@@ -1351,7 +1352,7 @@ FindGodPack() {
 	global winTitle, discordUserId, Delay, username, packs, minStars, scriptName, DeadCheck
 	gpFound := false
 	invalidGP := false
-	searchVariation := 5
+	searchVariation := 6
 	confirm := false
 	Loop {
 		if(FindBorders("lag") = 0)
@@ -2448,11 +2449,11 @@ DoTutorial() {
 	}
 
 	FindImageAndClick(34, 99, 74, 131, , "Swipe", 140, 375) ;click through cards until needing to swipe up
-		if(setSpeed > 1) {
-			FindImageAndClick(65, 195, 100, 215, , "Platin", 18, 109, 2000) ; click mod settings
-			FindImageAndClick(9, 170, 25, 190, , "One", 26, 180) ; click mod settings
-			Delay(1)
-		}
+		if(setSpeed != 2) {
+            FindImageAndClick(65, 195, 100, 215, , "Platin", 18, 109, 2000) ; click mod settings
+            FindImageAndClick(100, 170, 113, 190, , "Two", 107, 180) ; click mod settings
+            Delay(1)
+        }
 	failSafe := A_TickCount
 	failSafeTime := 0
 	Loop {
