@@ -90,6 +90,8 @@ IniRead, autoLaunchMonitor, Settings.ini, UserSettings, autoLaunchMonitor, 1
 IniRead, mainIdsURL, Settings.ini, UserSettings, mainIdsURL, ""
 IniRead, vipIdsURL, Settings.ini, UserSettings, vipIdsURL, ""
 IniRead, instanceLaunchDelay, Settings.ini, UserSettings, instanceLaunchDelay, 5
+IniRead, proxy, Settings.ini, UserSettings, proxy, 0
+
 
 ; Create a stylish GUI with custom colors and modern look
 Gui, Color, 1E1E1E, 333333 ; Dark theme background
@@ -693,7 +695,7 @@ IsLeapYear(year) {
 }
 
 LogToDiscord(message, screenshotFile := "", ping := false, xmlFile := "") {
-	global discordUserId, discordWebhookURL, friendCode, heartBeatWebhookURL
+	global discordUserId, discordWebhookURL, friendCode, heartBeatWebhookURL, proxy
 	discordPing := discordUserId
 	if(heartBeatWebhookURL)
 		discordWebhookURL := heartBeatWebhookURL
@@ -708,14 +710,24 @@ LogToDiscord(message, screenshotFile := "", ping := false, xmlFile := "") {
 					; Check if the file exists
 					if (FileExist(screenshotFile)) {
 						; Send the image using curl
-						curlCommand := "curl -k "
-							. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" " . discordWebhookURL
-						RunWait, %curlCommand%,, Hide
+						if(proxy = 0) {
+							curlCommand := "curl -k "
+								. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" " . discordWebhookURL
+						}else{
+							curlCommand := "curl -x " . proxy . " -k "
+								. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" " . discordWebhookURL
+						}
+							RunWait, %curlCommand%,, Hide
 					}
 				}
 				else {
-					curlCommand := "curl -k "
-						. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" " . discordWebhookURL
+					if(proxy = 0) {
+						curlCommand := "curl -k "
+							. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" " . discordWebhookURL
+					}else{
+						curlCommand := "curl -x " . proxy . " -k "
+							. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" " . discordWebhookURL
+					}
 					RunWait, %curlCommand%,, Hide
 				}
 				break
@@ -734,10 +746,29 @@ LogToDiscord(message, screenshotFile := "", ping := false, xmlFile := "") {
 }
 
 DownloadFile(url, filename) {
+	global proxy
 	url := url  ; Change to your hosted .txt URL "https://pastebin.com/raw/vYxsiqSs"
 	localPath = %A_ScriptDir%\%filename% ; Change to the folder you want to save the file
-
-	URLDownloadToFile, %url%, %localPath%
+	
+	errored := false
+	try {
+		whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+		whr.Open("GET", url, true)
+		if(proxy != 0){
+			whr.SetProxy(2, proxy)
+		}
+		whr.Send()
+		whr.WaitForResponse()
+		ids := whr.ResponseText
+	} catch {
+		errored := true
+	}
+	if(!errored) {
+		FileDelete, %localPath%
+		FileAppend, %ids%, %localPath%
+	}
+	; 原版下载ids.txt
+	; URLDownloadToFile, %url%, %localPath%
 
 	; if ErrorLevel
 	; MsgBox, Download failed!

@@ -65,6 +65,7 @@ IniRead, Mewtwo, %A_ScriptDir%\..\Settings.ini, UserSettings, Mewtwo, 0
 IniRead, slowMotion, %A_ScriptDir%\..\Settings.ini, UserSettings, slowMotion, 0
 IniRead, DeadCheck, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck, 0
 IniRead, ocrLanguage, %A_ScriptDir%\..\Settings.ini, UserSettings, ocrLanguage, en
+IniRead, proxy, %A_ScriptDir%\..\Settings.ini, UserSettings, proxy, 0
 
 pokemonList := ["Palkia", "Dialga", "Mew", "Pikachu", "Charizard", "Mewtwo", "Arceus"]
 
@@ -517,7 +518,7 @@ AddFriends(renew := false, getFC := false) {
 				Delay(3)
 				adbClick(210, 342)
 				Delay(3)
-				ClipWait
+				ClipWait, 2
 				friendCode := Clipboard
 				return friendCode
 			}
@@ -1731,12 +1732,16 @@ ControlClick(X, Y) {
 }
 
 DownloadFile(url, filename) {
+	global proxy
 	url := url  ; Change to your hosted .txt URL "https://pastebin.com/raw/vYxsiqSs"
 	localPath = %A_ScriptDir%\..\%filename% ; Change to the folder you want to save the file
 	errored := false
 	try {
 		whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 		whr.Open("GET", url, true)
+		if(proxy != 0){
+			whr.SetProxy(2, proxy)
+		}
 		whr.Send()
 		whr.WaitForResponse()
 		ids := whr.ResponseText
@@ -1828,7 +1833,7 @@ Screenshot(filename := "Valid") {
 }
 
 LogToDiscord(message, screenshotFile := "", ping := false, xmlFile := "", screenshotFile2 := "") {
-	global discordUserId, discordWebhookURL, friendCode
+	global discordUserId, discordWebhookURL, friendCode, proxy
 	discordPing := "<@" . discordUserId . "> "
 	discordFriends := ReadFile("discord")
 
@@ -1848,26 +1853,46 @@ LogToDiscord(message, screenshotFile := "", ping := false, xmlFile := "", screen
 				if(screenshotFile != "" && screenshotFile2 != "" && FileExist(screenshotFile) && FileExist(screenshotFile2))
 				{
 					; Send the image using curl
-					curlCommand := "curl -k "
-						. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" "
-						. "-F ""file1=@" . screenshotFile . """ "
-						. "-F ""file2=@" . screenshotFile2 . """ "
-						. discordWebhookURL
+					if(proxy = 0) {
+						curlCommand := "curl -k "
+							. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" "
+							. "-F ""file1=@" . screenshotFile . """ "
+							. "-F ""file2=@" . screenshotFile2 . """ "
+							. discordWebhookURL
+					}else{
+						curlCommand := "curl -x " . proxy . " -k "
+							. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" "
+							. "-F ""file1=@" . screenshotFile . """ "
+							. "-F ""file2=@" . screenshotFile2 . """ "
+							. discordWebhookURL
+					}
 					RunWait, %curlCommand%,, Hide
 				} else if (screenshotFile != "") {
 					; Check if the file exists
 					if (FileExist(screenshotFile)) {
 						; Send the image using curl
-						curlCommand := "curl -k "
-							. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" "
-							. "-F ""file=@" . screenshotFile . """ "
-							. discordWebhookURL
+						if(proxy = 0) {
+							curlCommand := "curl -k "
+								. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" "
+								. "-F ""file=@" . screenshotFile . """ "
+								. discordWebhookURL
+						}else{
+							curlCommand := "curl -x " . proxy . " -k "
+								. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" "
+								. "-F ""file=@" . screenshotFile . """ "
+								. discordWebhookURL
+						}
 						RunWait, %curlCommand%,, Hide
 					}
 				}
 				else {
-					curlCommand := "curl -k "
-						. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" " . discordWebhookURL
+					if(proxy = 0) {
+						curlCommand := "curl -k "
+							. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" " . discordWebhookURL
+					}else{
+						curlCommand := "curl -x " . proxy . " -k "
+							. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" " . discordWebhookURL
+					}
 					RunWait, %curlCommand%,, Hide
 				}
 				break

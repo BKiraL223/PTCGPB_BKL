@@ -52,6 +52,7 @@ if(heartBeat)
 IniRead, vipIdsURL, %A_ScriptDir%\..\Settings.ini, UserSettings, vipIdsURL
 IniRead, ocrLanguage, %A_ScriptDir%\..\Settings.ini, UserSettings, ocrLanguage, en
 IniRead, clientLanguage, %A_ScriptDir%\..\Settings.ini, UserSettings, clientLanguage, en
+IniRead, proxy, %A_ScriptDir%\..\Settings.ini, UserSettings, proxy, 0
 
 adbPort := findAdbPorts(folderPath)
 
@@ -603,7 +604,7 @@ Screenshot(filename := "Valid") {
 }
 
 LogToDiscord(message, screenshotFile := "", ping := false, xmlFile := "") {
-	global discordUserId, heartBeatWebhookURL, sendXML
+	global discordUserId, heartBeatWebhookURL, sendXML, proxy
 	if (heartBeatWebhookURL != "") {
 		MaxRetries := 10
 		RetryCount := 0
@@ -619,6 +620,9 @@ LogToDiscord(message, screenshotFile := "", ping := false, xmlFile := "") {
 				; Create the HTTP request object
 				whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 				whr.Open("POST", heartBeatWebhookURL, false)
+				if(proxy != 0){
+					whr.SetProxy(2, proxy)
+				}
 				whr.SetRequestHeader("Content-Type", "application/json")
 				whr.Send(data)
 
