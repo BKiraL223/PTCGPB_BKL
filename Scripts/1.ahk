@@ -665,6 +665,8 @@ changeProfile(character) {
 	Delay(3)
 	adbClick(143,466)
 	Delay(1)
+	FindImageAndClick(120, 500, 155, 530, , "Social", 143, 518, 500)
+	AddFriends(false, true)
 }
 
 ChooseTag() {
@@ -2805,7 +2807,7 @@ SelectPack(HG := false) {
 			if(FindImageAndClick(233, 486, 272, 519, , "Skip2", 130, 430, , 2)) ;click on next until skip button appears
 				break
 			Delay(1)
-			adbClick(200, 461)
+			adbClick(200, 451)
 			failSafeTime := (A_TickCount - failSafe) // 1000
 			CreateStatusMessage("In failsafe for Skip2. " . failSafeTime "/45 seconds")
 		}
