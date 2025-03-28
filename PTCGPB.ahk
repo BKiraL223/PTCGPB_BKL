@@ -210,8 +210,8 @@ if (clientLanguage != "")
 
 Gui, Add, DropDownList, vclientLanguage choose%defaultClientLang% x170 y420 w50 Background2A2A2A cWhite, %clientLanguageList%
 
-Gui, Add, Text, x20 y425 c4169E1, Launch All Mumu Delay:
-Gui, Add, Edit, vinstanceLaunchDelay w50 x175 y425 h20 -E0x200 Background2A2A2A cWhite Center, %instanceLaunchDelay%
+;Gui, Add, Text, x20 y425 c4169E1, Launch All Mumu Delay:
+;Gui, Add, Edit, vinstanceLaunchDelay w50 x175 y425 h20 -E0x200 Background2A2A2A cWhite Center, %instanceLaunchDelay%
 Gui, Add, Checkbox, % (autoLaunchMonitor ? "Checked" : "") " vautoLaunchMonitor x35 y450 c4169E1", Auto Launch Monitor
 Gui, Add, Checkbox, % (slowMotion ? "Checked" : "") " vslowMotion x35 y470 c4169E1", Base Game Compatibility
 
@@ -316,10 +316,10 @@ if(StrLen(mainIdsURL) < 3)
 if(StrLen(vipIdsURL) < 3)
 	vipIdsURL =
 
-Gui, Add, Text, x270 y405 cWhite, ids.txt API:
-Gui, Add, Edit, vmainIdsURL w460 x270 y425 h20 -E0x200 Background2A2A2A cWhite, %mainIdsURL%
-Gui, Add, Text, x270 y445 cWhite, vip_ids.txt (GP Test Mode) API:
-Gui, Add, Edit, vvipIdsURL w460 x270 y465 h20 -E0x200 Background2A2A2A cWhite, %vipIdsURL%
+Gui, Add, Text, x270 y430 cWhite, ids.txt API:
+Gui, Add, Edit, vmainIdsURL w460 x270 y450 h20 -E0x200 Background2A2A2A cWhite, %mainIdsURL%
+Gui, Add, Text, x270 y470 cWhite, vip_ids.txt (GP Test Mode) API:
+Gui, Add, Edit, vvipIdsURL w460 x270 y490 h20 -E0x200 Background2A2A2A cWhite, %vipIdsURL%
 
 if (defaultLanguage = "Scale125") {
 	defaultLang := 1
