@@ -747,6 +747,11 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
 			Y1 := 153
 			X2 := 159
 			Y2 := 162
+		} else if (imageName = "DeleteAll") { ; 100% for Deleteall offset
+			X1 := 200
+			Y1 := 340
+			X2 := 265
+			Y2 := 530
 		}
 	}
 	;bboxAndPause(X1, Y1, X2, Y2)
@@ -1150,7 +1155,7 @@ menuDelete() {
 		Loop {
 			clickButton := FindOrLoseImage(75, 340, 195, 530, 40, "Button2", 0, failSafeTime)
 			if(!clickButton) {
-				clickImage := FindOrLoseImage(140, 340, 250, 530, 60, "DeleteAll", 0, failSafeTime)
+				clickImage := FindOrLoseImage(200, 340, 250, 530, 60, "DeleteAll", 0, failSafeTime)
 				if(clickImage) {
 					StringSplit, pos, clickImage, `,  ; Split at ", "
 					if (scaleParam = 287) {
@@ -1218,7 +1223,7 @@ menuDeleteStart() {
 			Loop {
 				clickButton := FindOrLoseImage(75, 340, 195, 530, 80, "Button", 0, failSafeTime)
 				if(!clickButton) {
-					clickImage := FindOrLoseImage(140, 340, 250, 530, 60, "DeleteAll", 0, failSafeTime)
+					clickImage := FindOrLoseImage(200, 340, 250, 530, 60, "DeleteAll", 0, failSafeTime)
 					if(clickImage) {
 						StringSplit, pos, clickImage, `,  ; Split at ", "
 						if (scaleParam = 287) {
