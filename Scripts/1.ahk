@@ -17,7 +17,7 @@ DllCall("AllocConsole")
 WinHide % "ahk_id " DllCall("GetConsoleWindow", "ptr")
 
 global winTitle, changeDate, failSafe, openPack, Delay, failSafeTime, StartSkipTime, Columns, failSafe, adbPort, scriptName, adbShell, adbPath, GPTest, StatusText, defaultLanguage, setSpeed, jsonFileName, pauseToggle, SelectedMonitorIndex, swipeSpeed, godPack, scaleParam, discordUserId, discordWebhookURL, deleteMethod, packs, FriendID, friendIDs, Instances, username, friendCode, stopToggle, friended, runMain, Mains, showStatus, injectMethod, packMethod, loadDir, loadedAccount, nukeAccount, CheckShiningPackOnly, TrainerCheck, FullArtCheck, RainbowCheck, ShinyCheck, dateChange, foundGP, foundTS, friendsAdded, minStars, PseudoGodPack, Palkia, Dialga, Mew, Pikachu, Charizard, Mewtwo, packArray, CrownCheck, ImmersiveCheck, InvalidCheck, slowMotion, screenShot, accountFile, invalid, starCount, gpFound, foundTS, minStarsA1Charizard, minStarsA1Mewtwo, minStarsA1Pikachu, minStarsA1a, minStarsA2Dialga, minStarsA2Palkia, minStarsA2a, minStarsA2b
-global DeadCheck
+global DeadCheck, sendAccountXml
 
 scriptName := StrReplace(A_ScriptName, ".ahk")
 winTitle := scriptName
@@ -70,6 +70,7 @@ IniRead, slowMotion, %A_ScriptDir%\..\Settings.ini, UserSettings, slowMotion, 0
 IniRead, DeadCheck, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck, 0
 IniRead, ocrLanguage, %A_ScriptDir%\..\Settings.ini, UserSettings, ocrLanguage, en
 IniRead, proxy, %A_ScriptDir%\..\Settings.ini, UserSettings, proxy, 0
+IniRead, sendAccountXml, %A_ScriptDir%\..\Settings.ini, UserSettings, sendAccountXml, 0
 
 IniRead, minStarsA1Charizard, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA1Charizard, 0
 IniRead, minStarsA1Mewtwo, %A_ScriptDir%\..\Settings.ini, UserSettings, minStarsA1Mewtwo, 0
@@ -741,6 +742,11 @@ FindOrLoseImage(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT", E
 			Y1 := 220
 			X2 := 230
 			Y2 := 260
+		} else if (imageName = "Erika") { ; 100% fix for Erika avatar
+			X1 := 149
+			Y1 := 153
+			X2 := 159
+			Y2 := 162
 		}
 	}
 	;bboxAndPause(X1, Y1, X2, Y2)
@@ -857,6 +863,28 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
 			Y1 := 130
 			X2 := 174
 			Y2 := 155
+		} else if (imageName = "ChosenTag") { ; ChangeTag GP found
+			X1 := 218
+			Y1 := 307
+			X2 := 231
+			Y2 := 312
+		} else if (imageName = "Badge") { ; ChangeTag GP found
+			X1 := 48
+			Y1 := 204
+			X2 := 72
+			Y2 := 230
+		} else if (imageName = "ChooseErika") { ; ChangeTag GP found
+			X1 := 150
+			Y1 := 286
+			X2 := 155
+			Y2 := 291
+		} else if (imageName = "ChooseEevee") { ; Change Eevee Avatar
+			X1 := 157
+			Y1 := 195
+			X2 := 162
+			Y2 := 200
+			clickx := 147
+			clicky := 207
 		}
 	}
 
@@ -894,6 +922,8 @@ FindImageAndClick(X1, Y1, X2, Y2, searchVariation := "", imageName := "DEFAULT",
 			ElapsedTime := (A_TickCount - StartSkipTime) // 1000
 			if(imageName = "Country")
 				FSTime := 90
+			else if(imageName = "Proceed") ; Decrease time for Marowak
+				FSTime := 8
 			else
 				FSTime := 45
 			if(!skip) {
@@ -1055,7 +1085,7 @@ waitadb() {
 }
 
 restartGameInstance(reason, RL := true){
-	global Delay, scriptName, adbShell, adbPath, adbPort, friended, loadedAccount, DeadCheck
+	global Delay, scriptName, adbShell, adbPath, adbPort, friended, loadedAccount, DeadCheck, openPack
 	;initializeAdbShell()
 	CreateStatusMessage("Restarting game reason: `n" reason)
 
@@ -1078,14 +1108,9 @@ restartGameInstance(reason, RL := true){
 	} else if(RL) {
 		if(menuDeleteStart()) {
 			IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
-			logMessage := "\n" . username . "\n[" . starCount . "/5][" . packs . "P] " . invalid . " God pack found in instance: " . scriptName . "\nFile name: " . accountFile . "\nGot stuck getting friend code."
+			logMessage := "\n" . username . "\n[" . starCount . "/5][" . packs . "P][" . openPack . " Booster] " . invalid . " God pack found in instance: " . scriptName . "\nFile name: " . accountFile . "\nGot stuck getting friend code."
 			LogToFile(logMessage, "GPlog.txt")
-			/*
-			LogToDiscord(logMessage, screenShot, discordUserId)
-			*/
-			saveDir := A_ScriptDir "\..\Accounts\GodPacks\"
-			xmlFilePath := saveDir . accountFile
-			LogToDiscord(logMessage, screenShot, discordUserId, , xmlFilePath)
+			LogToDiscord(logMessage, screenShot, discordUserId, accountFullPath, fcScreenshot)
 		}
 		LogToFile("Restarted game for instance " scriptName " Reason: " reason, "Restart.txt")
 
@@ -1308,7 +1333,7 @@ SetTextAndResize(controlHwnd, newText) {
 }
 
 CheckPack() {
-	global scriptName, DeadCheck, CheckShiningPackOnly
+	global scriptName, DeadCheck, CheckShiningPackOnly, InvalidCheck
 	foundGP := false ;check card border to find godpacks
 	foundTrainer := false
 	foundRainbow := false
@@ -1357,7 +1382,7 @@ CheckPack() {
 		}
 	}
 	if(foundGP || foundTrainer || foundRainbow || foundFullArt || foundShiny || foundImmersive || foundCrown || 2starCount > 1) {
-		if(!(InvalidCheck && (foundShiny || foundImmersive || foundCrown) || foundGP)) {
+		if(!(InvalidCheck && (foundShiny || foundImmersive || foundCrown)) || foundGP) {
 			if(loadedAccount) {
 				FileDelete, %loadedAccount% ;delete xml file from folder if using inject method
 				IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
@@ -1373,9 +1398,9 @@ CheckPack() {
 }
 
 FoundStars(star) {
-	global scriptName, DeadCheck, ocrLanguage, injectMethod
+	global scriptName, DeadCheck, ocrLanguage, injectMethod, openPack
 	screenShot := Screenshot(star)
-	accountFile := saveAccount(star)
+	accountFile := saveAccount(star, accountFullPath)
 	friendCode := getFriendCode()
 	IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
 
@@ -1383,7 +1408,7 @@ FoundStars(star) {
 	Sleep, 8000
 	fcScreenshot := Screenshot("FRIENDCODE")
 
-	if(star = "Crown" || star = "Immersive")
+	if(star = "Crown" || star = "Immersive" || star = "Shiny")
 		RemoveFriends()
 	else {
 		; If we're doing the inject method, try to OCR our Username
@@ -1405,13 +1430,13 @@ FoundStars(star) {
 		}
 	}
 
-	logMessage := star . " found by " . username . " (" . friendCode . ") in instance: " . scriptName . " (" . packs . " packs)\nFile name: " . accountFile . "\nBacking up to the Accounts\\SpecificCards folder and continuing..."
+	logMessage := star . " found by " . username . " (" . friendCode . ") in instance: " . scriptName . " (" . packs . " packs, " . openPack . " booster)\nFile name: " . accountFile . "\nBacking up to the Accounts\\SpecificCards folder and continuing..."
 	CreateStatusMessage(logMessage)
 	LogToFile(logMessage, "GPlog.txt")
-	LogToDiscord(logMessage, screenShot, discordUserId, "", fcScreenshot)
+	LogToDiscord(logMessage, screenShot, discordUserId, accountFullPath, fcScreenshot)
 	/*
 	; 原版換 tag 及頭像
-	if(star != "Crown" && star != "Immersive")
+	if(star != "Crown" && star != "Immersive" && star != "Shiny")
 		ChooseTag()
 	*/
 }
@@ -1442,6 +1467,22 @@ FindBorders(prefix) {
 			,[255, 261, 258, 283]
 			,[130, 376, 133, 398]
 			,[215, 376, 218, 398]]
+	}
+	; 100% scale changes
+	if (scaleParam = 287) {
+		if (prefix = "shiny1star" || prefix = "shiny2star") {
+			borderCoords := [[91, 253, 95, 278]
+			,[175, 253, 179, 278]  
+			,[259, 253, 263, 278]
+			,[132, 370, 136, 395]
+			,[218, 371, 222, 394]]
+		} else {
+			borderCoords := [[30, 277, 85, 281]
+			,[112, 277, 167, 281]
+			,[195, 277, 250, 281]
+			,[70, 394, 125, 398]
+			,[156, 394, 211, 398]]
+		}
 	}
 	pBitmap := from_window(WinExist(winTitle))
 	; imagePath := "C:\Users\Arturo\Desktop\PTCGP\GPs\" . Clipboard . ".png"
@@ -1498,15 +1539,15 @@ FindGodPack() {
 	}
 	borderCoords := [[20, 284, 90, 286]
 		,[103, 284, 173, 286]]
-
+		
 	; Change borderCoords if scaleParam is 287 for 100%
 	if (scaleParam = 287) {
 		borderCoords := [[21, 278, 91, 280]
 			,[105, 278, 175, 280]]
 	}
 
-	;	SquallTCGP 2025.03.12 - 	Just checking the packs count and setting them to 0 if it's number of packs is 3.
-	;															This applies to any Delete Method except 5 Pack (Fast). This change is made based
+	;	SquallTCGP 2025.03.12 - 	Just checking the packs count and setting them to 0 if it's number of packs is 3. 
+	;															This applies to any Delete Method except 5 Pack (Fast). This change is made based 
 	;															on the 5p-no delete community mod created by DietPepperPhD in the discord server.
 	if(deleteMethod != "5 Pack (Fast)") {
 		if(packs = 3)
@@ -1566,7 +1607,7 @@ FindGodPack() {
 }
 
 GodPackFound(validity) {
-	global scriptName, DeadCheck, ocrLanguage, injectMethod
+	global scriptName, DeadCheck, ocrLanguage, injectMethod, openPack
 
 	if(validity = "Valid") {
 		IniWrite, 0, %A_ScriptDir%\%scriptName%.ini, UserSettings, DeadCheck
@@ -1581,7 +1622,7 @@ GodPackFound(validity) {
 	Interjection := Praise[rand]
 	starCount := 5 - FindBorders("1star") - FindBorders("shiny1star")
 	screenShot := Screenshot(validity)
-	accountFile := saveAccount(validity)
+	accountFile := saveAccount(validity, accountFullPath)
 	logMessage := "\n" . username . "\n[" . starCount . "/5][" . packs . "P] " . invalid . " God pack found in instance: " . scriptName . "\nFile name: " . accountFile . "\nGetting friend code then sendind discord message."
 	godPackLog = GPlog.txt
 	LogToFile(logMessage, godPackLog)
@@ -1617,19 +1658,19 @@ GodPackFound(validity) {
 		LogToFile("Failed to OCR the friend code: " . e.message, "BC.txt")
 	}
 
-	logMessage := Interjection . "\n" . username . " (" . friendCode . ")\n[" . starCount . "/5][" . packs . "P] " . invalid . " God pack found in instance: " . scriptName . "\nFile name: " . accountFile . "\nBacking up to the Accounts\\GodPacks folder and continuing..."
+	logMessage := Interjection . "\n" . username . " (" . friendCode . ")\n[" . starCount . "/5][" . packs . "P][" . openPack . " Booster] " . invalid . " God pack found in instance: " . scriptName . "\nFile name: " . accountFile . "\nBacking up to the Accounts\\GodPacks folder and continuing..."
 	LogToFile(logMessage, godPackLog)
 	;Run, http://google.com, , Hide ;Remove the ; at the start of the line and replace your url if you want to trigger a link when finding a god pack.
 
 	; Adjust the below to only send a 'ping' to Discord friends on Valid packs
 	if(validity = "Valid") {
-		LogToDiscord(logMessage, screenShot, discordUserId, "", fcScreenshot)
+		LogToDiscord(logMessage, screenShot, discordUserId, accountFullPath, fcScreenshot)
 		/*
 		; 原版換 tag 及頭像
 		ChooseTag()
 		*/
 	} else {
-		LogToDiscord(logMessage, screenShot)
+		LogToDiscord(logMessage, screenShot, false, accountFullPath, fcScreenshot)
 	}
 }
 
@@ -1703,7 +1744,7 @@ loadAccount() {
 	return loadDir
 }
 
-saveAccount(file := "Valid") {
+saveAccount(file := "Valid", ByRef filePath := "") {
 	global adbShell, adbPath, adbPort
 	;initializeAdbShell()
 	currentDate := A_Now
@@ -1716,6 +1757,8 @@ saveAccount(file := "Valid") {
 	daysSinceBase += day
 
 	remainder := Mod(daysSinceBase, 3)
+
+	filePath := ""
 
 	if (file = "All") {
 		saveDir := A_ScriptDir "\..\Accounts\Saved\" . remainder . "\" . winTitle
@@ -1885,6 +1928,10 @@ Screenshot(filename := "Valid") {
 	screenshotFile := screenshotsDir "\" . A_Now . "_" . winTitle . "_" . filename . "_" . packs . "_packs.png"
 	pBitmapW := from_window(WinExist(winTitle))
 	pBitmap := Gdip_CloneBitmapArea(pBitmapW, 18, 175, 240, 227)
+	;scale 100%
+	if (scaleParam = 287) {
+	pBitmap := Gdip_CloneBitmapArea(pBitmapW, 17, 168, 245, 230)
+	}
 	Gdip_DisposeImage(pBitmapW)
 
 	;scale 100%
@@ -1911,6 +1958,8 @@ LogToDiscord(message, screenshotFile := "", ping := false, xmlFile := "", screen
 	}
 
 	if (discordWebhookURL != "") {
+		if (!sendAccountXml)
+			xmlFile := ""
 		MaxRetries := 10
 		RetryCount := 0
 		Loop {
@@ -3011,7 +3060,7 @@ HourglassOpening(HG := false) {
 		if(clickButton) {
 			StringSplit, pos, clickButton, `,  ; Split at ", "
 			if (scaleParam = 287) {
-				pos2 += 0 ; 5改0
+				pos2 += 5
 			}
 			adbClick(pos1, pos2)
 		}
