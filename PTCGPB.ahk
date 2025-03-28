@@ -143,7 +143,6 @@ Gui, Add, Text, x20 y230 c9370DB, Swipe Speed (ms):
 Gui, Add, Edit, vswipeSpeed w60 x145 y228 h20 -E0x200 Background2A2A2A cWhite Center, %swipeSpeed%
 Gui, Add, Text, x20 y255 c9370DB, Wait Time (sec):
 Gui, Add, Edit, vwaitTime w60 x145 y253 h20 -E0x200 Background2A2A2A cWhite Center, %waitTime%
-Gui, Add, Checkbox, % (slowMotion ? "Checked" : "") " vslowMotion x20 y280 c9370DB", Base Game Compatibility
 
 ; ========== System Settings Section ==========
 Gui, Add, GroupBox, x5 y305 w240 h210 c4169E1, System Settings ; Royal Blue
@@ -329,7 +328,7 @@ if (defaultLanguage = "Scale125") {
 	defaultLang := 2
 	scaleParam := 287
 }
-Gui, Add, DropDownList, x597 y397 w145 vdefaultLanguage choose%defaultLang%, Scale125|Scale100
+;Gui, Add, DropDownList, x597 y397 w145 vdefaultLanguage choose%defaultLang%, Scale125|Scale100
 
 ;Gui, Add, Text, x270 y400 cWhite, Scale:
 ;Gui, Add, DropDownList, x310 y395 w145 vdefaultLanguage choose%defaultLang%, Scale125
