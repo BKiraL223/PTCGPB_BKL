@@ -16,13 +16,10 @@ if not A_IsAdmin
 	Run *RunAs "%A_ScriptFullPath%"
 	ExitApp
 }
-
 /*
 MsgBox, 64, The project is now licensed under CC BY-NC 4.0, The original intention of this project was not for it to be used for paid services even those disguised as 'donations.' I hope people respect my wishes and those of the community. `nThe project is now licensed under CC BY-NC 4.0, which allows you to use, modify, and share the software only for non-commercial purposes. Commercial use, including using the software to provide paid services or selling it (even if donations are involved), is not allowed under this license. The new license applies to this and all future releases.
 
 CheckForUpdate()
-
-MsgBox, 64, 白王修改版, 感謝群友的努力新增了以下四點 1.SCALE100 2.出神包更換頭像成皮卡丘以及簽名改成我是新人(可能不同語系會不相同) 3.Main重啟改到心跳頻道 4.有超過一個Main需求的 可以手動進去SCRIPTS資料夾 點開Main2或是Main3 模擬器也要是相同名稱 提醒:作者表示這些都是公開且免費的 有需要的人都可以去他的GitHub下載.
 
 KillADBProcesses()
 */
@@ -110,6 +107,8 @@ IniRead, sendAccountXml, Settings.ini, UserSettings, sendAccountXml, 0
 ; Create a stylish GUI with custom colors and modern look
 Gui, Color, 1E1E1E, 333333 ; Dark theme background
 Gui, Font, s10 cWhite, Segoe UI ; Modern font
+
+
 
 ; ========== Column 1 ==========
 ; ==============================
@@ -340,6 +339,7 @@ Gui, Add, Edit, vvipIdsURL w460 x270 y485 h20 -E0x200 Background2A2A2A cWhite, %
 Gui, Show, , %localVersion% PTCGPB Bot Setup [Non-Commercial 4.0 International License]
 Return
 
+
 CheckForUpdates:
 	CheckForUpdate()
 return
@@ -416,10 +416,6 @@ ArrangeWindows:
 	}
 return
 
-; 開啟說明網頁
-OpenGuide:
-	Run, https://dgood.notion.site/PTCGPB-v6-3-8-19ef6eced61b80898c5ef41e0b2c9b9f?pvs=4
-
 LaunchAllMumu:
 	GuiControlGet, Instances,, Instances
 	GuiControlGet, folderPath,, folderPath
@@ -447,50 +443,6 @@ return
 OpenDiscord:
 	Run, https://discord.gg/C9Nyf7P4sT
 return
-
-SaveSettings:
-	Gui, Submit, NoHide  ; Collect the input values from the first page
-
-	IniWrite, %FriendID%, Settings.ini, UserSettings, FriendID
-	IniWrite, %waitTime%, Settings.ini, UserSettings, waitTime
-	IniWrite, %Delay%, Settings.ini, UserSettings, Delay
-	IniWrite, %folderPath%, Settings.ini, UserSettings, folderPath
-	IniWrite, %discordWebhookURL%, Settings.ini, UserSettings, discordWebhookURL
-	IniWrite, %discordUserId%, Settings.ini, UserSettings, discordUserId
-	IniWrite, %Columns%, Settings.ini, UserSettings, Columns
-	IniWrite, %openPack%, Settings.ini, UserSettings, openPack
-	IniWrite, %godPack%, Settings.ini, UserSettings, godPack
-	IniWrite, %Instances%, Settings.ini, UserSettings, Instances
-	IniWrite, %instanceStartDelay%, Settings.ini, UserSettings, instanceStartDelay
-	;IniWrite, %setSpeed%, Settings.ini, UserSettings, setSpeed
-	IniWrite, %defaultLanguage%, Settings.ini, UserSettings, defaultLanguage
-	IniWrite, %SelectedMonitorIndex%, Settings.ini, UserSettings, SelectedMonitorIndex
-	IniWrite, %swipeSpeed%, Settings.ini, UserSettings, swipeSpeed
-	IniWrite, %deleteMethod%, Settings.ini, UserSettings, deleteMethod
-	IniWrite, %runMain%, Settings.ini, UserSettings, runMain
-	IniWrite, %heartBeat%, Settings.ini, UserSettings, heartBeat
-	IniWrite, %heartBeatWebhookURL%, Settings.ini, UserSettings, heartBeatWebhookURL
-	IniWrite, %heartBeatName%, Settings.ini, UserSettings, heartBeatName
-	IniWrite, %nukeAccount%, Settings.ini, UserSettings, nukeAccount
-	IniWrite, %packMethod%, Settings.ini, UserSettings, packMethod
-	IniWrite, %TrainerCheck%, Settings.ini, UserSettings, TrainerCheck
-	IniWrite, %FullArtCheck%, Settings.ini, UserSettings, FullArtCheck
-	IniWrite, %RainbowCheck%, Settings.ini, UserSettings, RainbowCheck
-	IniWrite, %CrownCheck%, Settings.ini, UserSettings, CrownCheck
-	IniWrite, %ImmersiveCheck%, Settings.ini, UserSettings, ImmersiveCheck
-	IniWrite, %PseudoGodPack%, Settings.ini, UserSettings, PseudoGodPack
-	IniWrite, %minStars%, Settings.ini, UserSettings, minStars
-	IniWrite, %Palkia%, Settings.ini, UserSettings, Palkia
-	IniWrite, %Dialga%, Settings.ini, UserSettings, Dialga
-	IniWrite, %Arceus%, Settings.ini, UserSettings, Arceus
-	IniWrite, %Mew%, Settings.ini, UserSettings, Mew
-	IniWrite, %Pikachu%, Settings.ini, UserSettings, Pikachu
-	IniWrite, %Charizard%, Settings.ini, UserSettings, Charizard
-	IniWrite, %Mewtwo%, Settings.ini, UserSettings, Mewtwo
-	IniWrite, %slowMotion%, Settings.ini, UserSettings, slowMotion
-
-	MsgBox, 儲存成功
-Return
 
 Start:
 	Gui, Submit  ; Collect the input values from the first page
@@ -769,7 +721,7 @@ IsLeapYear(year) {
 }
 
 LogToDiscord(message, screenshotFile := "", ping := false, xmlFile := "") {
-	global discordUserId, discordWebhookURL, friendCode, heartBeatWebhookURL, proxy
+	global discordUserId, discordWebhookURL, friendCode, heartBeatWebhookURL
 	discordPing := discordUserId
 	if(heartBeatWebhookURL)
 		discordWebhookURL := heartBeatWebhookURL
@@ -784,24 +736,14 @@ LogToDiscord(message, screenshotFile := "", ping := false, xmlFile := "") {
 					; Check if the file exists
 					if (FileExist(screenshotFile)) {
 						; Send the image using curl
-						if(proxy = 0) {
-							curlCommand := "curl -k "
-								. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" " . discordWebhookURL
-						}else{
-							curlCommand := "curl -x " . proxy . " -k "
-								. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" " . discordWebhookURL
-						}
-							RunWait, %curlCommand%,, Hide
+						curlCommand := "curl -k "
+							. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" " . discordWebhookURL
+						RunWait, %curlCommand%,, Hide
 					}
 				}
 				else {
-					if(proxy = 0) {
-						curlCommand := "curl -k "
-							. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" " . discordWebhookURL
-					}else{
-						curlCommand := "curl -x " . proxy . " -k "
-							. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" " . discordWebhookURL
-					}
+					curlCommand := "curl -k "
+						. "-F ""payload_json={\""content\"":\""" . discordPing . message . "\""};type=application/json;charset=UTF-8"" " . discordWebhookURL
 					RunWait, %curlCommand%,, Hide
 				}
 				break
@@ -820,29 +762,10 @@ LogToDiscord(message, screenshotFile := "", ping := false, xmlFile := "") {
 }
 
 DownloadFile(url, filename) {
-	global proxy
 	url := url  ; Change to your hosted .txt URL "https://pastebin.com/raw/vYxsiqSs"
 	localPath = %A_ScriptDir%\%filename% ; Change to the folder you want to save the file
-	
-	errored := false
-	try {
-		whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-		whr.Open("GET", url, true)
-		if(proxy != 0){
-			whr.SetProxy(2, proxy)
-		}
-		whr.Send()
-		whr.WaitForResponse()
-		ids := whr.ResponseText
-	} catch {
-		errored := true
-	}
-	if(!errored) {
-		FileDelete, %localPath%
-		FileAppend, %ids%, %localPath%
-	}
-	; 原版下载ids.txt
-	; URLDownloadToFile, %url%, %localPath%
+
+	URLDownloadToFile, %url%, %localPath%
 
 	; if ErrorLevel
 	; MsgBox, Download failed!
