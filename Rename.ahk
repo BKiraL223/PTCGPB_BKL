@@ -1,6 +1,6 @@
 ﻿#NoEnv
 
-Gui, Add, Text, x10 y10, 請輸入您的 ID:
+Gui, Add, Text, x10 y10, 請輸入您的 ID(4个字母):
 Gui, Add, Edit, vUserID x10 y30 w200
 Gui, Add, Button, x10 y60 w100 gGenerateFile, 生成 userNames.txt
 Gui, Show, w250 h100, ID 生成器
@@ -19,7 +19,8 @@ GenerateFile:
     FilePath := A_ScriptDir "\usernames.txt"
     UserList := ""
     Loop, 5000 {
-        UserList .= UserID A_Index "`n"
+        num := Format("{:04d}",A_Index-1)
+        UserList .= UserID "x" num "`n"
     }
     FileDelete, %FilePath%  ; 刪除舊文件 (如果存在)
     FileAppend, %UserList%, %FilePath%
